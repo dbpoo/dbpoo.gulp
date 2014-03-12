@@ -1,0 +1,1 @@
+define(function(){var n=function(n,t){return n+t};return{total:n}});

@@ -8,7 +8,7 @@ var gulp    = require('gulp'),                 //基础库
     imagemin = require('gulp-imagemin'),       //图片压缩
     sass = require('gulp-ruby-sass'),          //sass
     minifycss = require('gulp-minify-css'),    //css压缩
-    jshint = require('gulp-jshint'),           //js检查
+    //jshint = require('gulp-jshint'),           //js检查
     uglify  = require('gulp-uglify'),          //js压缩
     rename = require('gulp-rename'),           //重命名
     concat  = require('gulp-concat'),          //合并文件
@@ -54,23 +54,32 @@ gulp.task('images', function(){
 
 // js处理
 gulp.task('js', function () {
-    var jsSrc = './src/js/*.js',
-        jsDst ='./dist/js';
+    var mainSrc = './src/js/main.js',
+        mainDst = './dist/js/',
+        appSrc = './src/js/vendor/*.js',
+        appDst = './dist/js/vendor/';
 
-    gulp.src(jsSrc)
-        .pipe(jshint('.jshintrc'))
-        .pipe(jshint.reporter('default'))
-        .pipe(concat('main.js'))
-        .pipe(gulp.dest(jsDst))
-        .pipe(rename({ suffix: '.min' }))
+    gulp.src(mainSrc)
+        //.pipe(jshint('.jshintrc'))
+        //.pipe(jshint.reporter('default'))
+        //.pipe(concat('main.js'))
+        //.pipe(gulp.dest(jsDst))
+        //.pipe(rename({ suffix: '.min' }))
         .pipe(uglify())
-        .pipe(livereload(server))
-        .pipe(gulp.dest(jsDst));
+        .pipe(concat("main.js"))
+        .pipe(gulp.dest(mainDst))
+        .pipe(livereload(server));
+
+    gulp.src(appSrc)
+        .pipe(uglify())
+        //.pipe(concat("vendor.js"))
+        .pipe(gulp.dest(appDst))
+        .pipe(livereload(server));
 });
 
 // 清空图片、样式、js
 gulp.task('clean', function() {
-    gulp.src(['./dist/css', './dist/js', './dist/images'], {read: false})
+    gulp.src(['./dist/css', './dist/js/main.js','./dist/js/vendor', './dist/images'], {read: false})
         .pipe(clean());
 });
 
@@ -103,7 +112,7 @@ gulp.task('watch',function(){
         });
 
         // 监听js
-        gulp.watch('./src/js/*.js', function(){
+        gulp.watch(['./src/js/main.js','./src/js/vendor/*.js'], function(){
             gulp.run('js');
         });
 
