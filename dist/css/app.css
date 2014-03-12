@@ -7,8 +7,8 @@
 }
 
 .acc {
-  width: 300px;
+  width: 800px;
   height: 60px;
+  padding: 0 10px;
   background-color: #ff0000;
-  float: right;
 }

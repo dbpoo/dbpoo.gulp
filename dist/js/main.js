@@ -1,7 +1,1 @@
-(function(){
-    console.log('这是a文件');
-})();
-
-(function(){
-    console.log('这是a文件');
-})();
+require.config({baseUrl:"/js/",paths:{zepto:"libs/zepto"}}),require(["vendor/a"],function(e){console.log(e.total(5,10))});
