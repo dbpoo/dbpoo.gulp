@@ -1,0 +1,17 @@
+@import "options";
+@import "mixins";
+@import "hacks";
+
+@import "effects/2d-transitions/bob";
+@if $includeClasses {
+	.#{$nameSpace}-bob {
+		@include bob();
+	}
+}
+
+@import "effects/border-transitions/underline-reveal";
+@if $includeClasses {
+	.#{$nameSpace}-underline-reveal {
+		@include underline-reveal();
+	}
+}

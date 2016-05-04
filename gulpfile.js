@@ -1,120 +1,81 @@
-/**
- * 初始化
- * npm install gulp-util gulp-imagemin gulp-sass gulp-minify-css gulp-uglify gulp-rename gulp-concat gulp-clean gulp-clean tiny-lr --save-dev
- */
+var gulp = require('gulp');
+var sass = require('gulp-sass');
+var coffee = require('gulp-coffee');
+var concat = require('gulp-concat');
+var uglify = require('gulp-uglify');
+var sourcemaps = require('gulp-sourcemaps');
+var zip = require('gulp-zip');
+var del = require('del');
 
-// 引入 gulp及组件
-var gulp    = require('gulp'),                 //基础库
-    imagemin = require('gulp-imagemin'),       //图片压缩
-    sass = require('gulp-ruby-sass'),          //sass
-    minifycss = require('gulp-minify-css'),    //css压缩
-    //jshint = require('gulp-jshint'),           //js检查
-    uglify  = require('gulp-uglify'),          //js压缩
-    rename = require('gulp-rename'),           //重命名
-    concat  = require('gulp-concat'),          //合并文件
-    clean = require('gulp-clean'),             //清空文件夹
-    tinylr = require('tiny-lr'),               //livereload
-    server = tinylr(),
-    port = 35729,
-    livereload = require('gulp-livereload');   //livereload
+var paths = {
+    sass: 'client/sass/**/*.scss',
+    scripts: ['client/js/**/*.js', '!client/external/**/*.js'],
+    jslib: ['client/jslib/jquery.swiper.js','client/jslib/jquery.backtop.js'],
+    images: 'client/img/**/*'
+};
 
-// HTML处理
-gulp.task('html', function() {
-    var htmlSrc = './src/*.html',
-        htmlDst = './dist/';
+var timestamp = function() {
+    var curDate = new Date();
 
-    gulp.src(htmlSrc)
-        .pipe(livereload(server))
-        .pipe(gulp.dest(htmlDst))
+    var Year = curDate.getFullYear().toString().slice(-2);
+    var Month = ('0' + (curDate.getMonth() + 1)).slice(-2);
+    var Day = ('0' + curDate.getDate()).slice(-2);
+    var Hours = ("0" + curDate.getHours()).slice(-2);
+    var Minutes = ("0" + curDate.getMinutes()).slice(-2);
+
+    return FullDate = Year + Month + Day + Hours + Minutes;
+};
+
+// Not all tasks need to use streams
+// A gulpfile is just another node program and you can use any package available on npm
+gulp.task('clean', function(cb) {
+    // You can use multiple globbing patterns as you would with `gulp.src`
+    del(['build/js','build/css'], cb);
 });
 
-// 样式处理
-gulp.task('css', function () {
-    var cssSrc = './src/scss/*.scss',
-        cssDst = './dist/css';
+var css = function() {
+    return gulp.src(paths.sass)
+        //.pipe(sourcemaps.init())
+        .pipe(sass({outputStyle: 'compressed'}))
+        //.pipe(sourcemaps.write())
+        .pipe(gulp.dest('build/css'));
+};
+gulp.task('css', ['clean'], css);
+gulp.task('css-watch', css);
 
-    gulp.src(cssSrc)
-        .pipe(sass({ style: 'expanded'}))
-        .pipe(gulp.dest(cssDst))
-        .pipe(rename({ suffix: '.min' }))
-        .pipe(minifycss())
-        .pipe(livereload(server))
-        .pipe(gulp.dest(cssDst));
-});
-
-// 图片处理
-gulp.task('images', function(){
-    var imgSrc = './src/images/**/*',
-        imgDst = './dist/images';
-    gulp.src(imgSrc)
-        .pipe(imagemin())
-        .pipe(livereload(server))
-        .pipe(gulp.dest(imgDst));
-})
-
-// js处理
-gulp.task('js', function () {
-    var mainSrc = './src/js/main.js',
-        mainDst = './dist/js/',
-        appSrc = './src/js/vendor/*.js',
-        appDst = './dist/js/vendor/';
-
-    gulp.src(mainSrc)
-        //.pipe(jshint('.jshintrc'))
-        //.pipe(jshint.reporter('default'))
-        //.pipe(concat('main.js'))
-        //.pipe(gulp.dest(jsDst))
-        //.pipe(rename({ suffix: '.min' }))
+var scripts = function() {
+    return gulp.src(paths.scripts)
+        //.pipe(sourcemaps.init())
+        //.pipe(coffee())
         .pipe(uglify())
-        .pipe(concat("main.js"))
-        .pipe(gulp.dest(mainDst))
-        .pipe(livereload(server));
+        //.pipe(concat('app201604.min.js'))
+        //.pipe(sourcemaps.write())
+        .pipe(gulp.dest('build/js'));
+};
+gulp.task('scripts', ['clean'], scripts);
+gulp.task('scripts-watch', scripts);
 
-    gulp.src(appSrc)
+var jslibrary = function() {
+    return gulp.src(paths.jslib)
         .pipe(uglify())
-        //.pipe(concat("vendor.js"))
-        .pipe(gulp.dest(appDst))
-        .pipe(livereload(server));
+        .pipe(concat('lib201604.min.js'))
+        .pipe(gulp.dest('build/js'));
+};
+gulp.task('jslibrary', ['clean'], jslibrary);
+gulp.task('jslibrary-watch', jslibrary);
+
+// Rerun the task when a file changes
+gulp.task('watch', function() {
+    gulp.watch(paths.sass, ['css-watch']);
+    gulp.watch(paths.scripts, ['scripts-watch']);
+    gulp.watch(paths.jslib, ['jslibrary-watch']);
 });
 
-// 清空图片、样式、js
-gulp.task('clean', function() {
-    gulp.src(['./dist/css', './dist/js/main.js','./dist/js/vendor', './dist/images'], {read: false})
-        .pipe(clean());
+gulp.task('zip', function(){
+    return gulp.src('build/**')
+        .pipe(zip('ah2_'+ timestamp() +'.zip'))
+        .pipe(gulp.dest('zip'));
 });
 
-// 默认任务 清空图片、样式、js并重建 运行语句 gulp
-gulp.task('default', ['clean'], function(){
-    gulp.start('html','css','images','js');
-});
-
-// 监听任务 运行语句 gulp watch
-gulp.task('watch',function(){
-
-    server.listen(port, function(err){
-        if (err) {
-            return console.log(err);
-        }
-
-        // 监听html
-        gulp.watch('./src/*.html', function(event){
-            gulp.run('html');
-        })
-
-        // 监听css
-        gulp.watch('./src/scss/*.scss', function(){
-            gulp.run('css');
-        });
-
-        // 监听images
-        gulp.watch('./src/images/**/*', function(){
-            gulp.run('images');
-        });
-
-        // 监听js
-        gulp.watch(['./src/js/main.js','./src/js/vendor/*.js'], function(){
-            gulp.run('js');
-        });
-
-    });
-});
+// The default task (called when you run `gulp` from cli)
+gulp.task('default', ['watch', 'css', 'scripts', 'jslibrary']);

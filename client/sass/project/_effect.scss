@@ -1,0 +1,18 @@
+.pt-page-moveFromTop {
+    -webkit-animation: moveFromTop .6s ease both;
+    animation: moveFromTop .6s ease both;
+}
+
+.pt-page-moveToBottom {
+    -webkit-animation: moveToBottom .6s ease both;
+    animation: moveToBottom .6s ease both;
+}
+
+@-webkit-keyframes moveToBottom {
+    from { }
+    to { -webkit-transform: translateY(100%); }
+}
+
+@-webkit-keyframes moveFromTop {
+    from { -webkit-transform: translateY(-100%); }
+}

@@ -1,0 +1,20 @@
+//
+// backtop
+// --------------------------------------------------
+
+#scrollUp {
+  width: 61px;
+  height: 64px;
+  bottom: 50px;
+  left: 50%;
+  margin-left: 600px;
+  background: url(../img201604/backtop.png) 0 0 no-repeat
+}
+@media (max-width: 768px) {
+  #scrollUp {
+    left:auto;
+    bottom: 50px;
+    right: 20px;
+    margin-left: 0;
+  }
+}
