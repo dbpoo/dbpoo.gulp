@@ -1,7 +1,8 @@
 var gulp = require('gulp');
 var sass = require('gulp-sass');
-var coffee = require('gulp-coffee');
+var header = require('gulp-header');
 var concat = require('gulp-concat');
+var prepack = require('gulp-prepack');
 var uglify = require('gulp-uglify');
 var sourcemaps = require('gulp-sourcemaps');
 var zip = require('gulp-zip');
@@ -10,7 +11,7 @@ var del = require('del');
 var paths = {
     sass: 'client/sass/**/*.scss',
     scripts: ['client/js/**/*.js', '!client/external/**/*.js'],
-    jslib: ['client/jslib/jquery.swiper.js','client/jslib/jquery.backtop.js'],
+    jslib: ['client/jslib/**/*.js'],
     images: 'client/img/**/*'
 };
 
@@ -26,6 +27,13 @@ var timestamp = function() {
     return FullDate = Year + Month + Day + Hours + Minutes;
 };
 
+var pkg = require('./package.json');
+var banner = ['/**',
+    ' * @Author - <%= pkg.author %>',
+    ' * @version - ' + timestamp(),
+    ' */',
+    ''].join('\n');
+
 // Not all tasks need to use streams
 // A gulpfile is just another node program and you can use any package available on npm
 gulp.task('clean', function(cb) {
@@ -38,6 +46,7 @@ var css = function() {
         //.pipe(sourcemaps.init())
         .pipe(sass({outputStyle: 'compressed'}))
         //.pipe(sourcemaps.write())
+        .pipe(header(banner, { pkg : pkg }))
         .pipe(gulp.dest('build/css'));
 };
 gulp.task('css', ['clean'], css);
@@ -46,10 +55,11 @@ gulp.task('css-watch', css);
 var scripts = function() {
     return gulp.src(paths.scripts)
         //.pipe(sourcemaps.init())
-        //.pipe(coffee())
+        .pipe(prepack())
         .pipe(uglify())
-        //.pipe(concat('app201604.min.js'))
+        .pipe(concat('app.min.js'))
         //.pipe(sourcemaps.write())
+        .pipe(header(banner, { pkg : pkg }))
         .pipe(gulp.dest('build/js'));
 };
 gulp.task('scripts', ['clean'], scripts);
@@ -57,8 +67,10 @@ gulp.task('scripts-watch', scripts);
 
 var jslibrary = function() {
     return gulp.src(paths.jslib)
+        .pipe(prepack())
         .pipe(uglify())
-        .pipe(concat('lib201604.min.js'))
+        .pipe(concat('lib.min.js'))
+        .pipe(header(banner, { pkg : pkg }))
         .pipe(gulp.dest('build/js'));
 };
 gulp.task('jslibrary', ['clean'], jslibrary);
@@ -73,7 +85,7 @@ gulp.task('watch', function() {
 
 gulp.task('zip', function(){
     return gulp.src('build/**')
-        .pipe(zip('ah2_'+ timestamp() +'.zip'))
+        .pipe(zip('kof_world_'+ timestamp() +'.zip'))
         .pipe(gulp.dest('zip'));
 });
 
