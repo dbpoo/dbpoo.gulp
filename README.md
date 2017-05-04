@@ -9,6 +9,6 @@
 - 图片压缩使用的tinypng.org 买的压缩PS压缩插件。
 - 样式基于bootstrap
 
-# 文件说明
+## 文件说明
 - build - img js css （生成文件）
 - client - js jslib sass （源文件）
