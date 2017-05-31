@@ -2,13 +2,14 @@ var gulp = require('gulp');
 var sass = require('gulp-sass');
 var header = require('gulp-header');
 var concat = require('gulp-concat');
-var prepack = require('gulp-prepack');
 var uglify = require('gulp-uglify');
 var sourcemaps = require('gulp-sourcemaps');
+var connect = require('gulp-connect');
 var zip = require('gulp-zip');
 var del = require('del');
 
 var paths = {
+    html: '*.html',
     sass: 'client/sass/**/*.scss',
     scripts: ['client/js/**/*.js', '!client/external/**/*.js'],
     jslib: ['client/jslib/**/*.js'],
@@ -41,13 +42,20 @@ gulp.task('clean', function(cb) {
     del(['build/js','build/css'], cb);
 });
 
+var html = function() {
+    return gulp.src(paths.html)
+        .pipe(connect.reload());
+};
+gulp.task('html-watch', html);
+
 var css = function() {
     return gulp.src(paths.sass)
         //.pipe(sourcemaps.init())
         .pipe(sass({outputStyle: 'compressed'}))
         //.pipe(sourcemaps.write())
         .pipe(header(banner, { pkg : pkg }))
-        .pipe(gulp.dest('build/css'));
+        .pipe(gulp.dest('build/css'))
+        .pipe(connect.reload());
 };
 gulp.task('css', ['clean'], css);
 gulp.task('css-watch', css);
@@ -55,29 +63,38 @@ gulp.task('css-watch', css);
 var scripts = function() {
     return gulp.src(paths.scripts)
         //.pipe(sourcemaps.init())
-        .pipe(prepack())
+        //.pipe(coffee())
         .pipe(uglify())
         .pipe(concat('app.min.js'))
         //.pipe(sourcemaps.write())
         .pipe(header(banner, { pkg : pkg }))
-        .pipe(gulp.dest('build/js'));
+        .pipe(gulp.dest('build/js'))
+        .pipe(connect.reload());
 };
 gulp.task('scripts', ['clean'], scripts);
 gulp.task('scripts-watch', scripts);
 
 var jslibrary = function() {
     return gulp.src(paths.jslib)
-        .pipe(prepack())
         .pipe(uglify())
         .pipe(concat('lib.min.js'))
         .pipe(header(banner, { pkg : pkg }))
-        .pipe(gulp.dest('build/js'));
+        .pipe(gulp.dest('build/js'))
+        .pipe(connect.reload());
 };
 gulp.task('jslibrary', ['clean'], jslibrary);
 gulp.task('jslibrary-watch', jslibrary);
 
 // Rerun the task when a file changes
+gulp.task('connect', function () {
+    connect.server({
+        port: 8090,
+        livereload: true
+    });
+});
+
 gulp.task('watch', function() {
+    gulp.watch(paths.html, ['html-watch']);
     gulp.watch(paths.sass, ['css-watch']);
     gulp.watch(paths.scripts, ['scripts-watch']);
     gulp.watch(paths.jslib, ['jslibrary-watch']);
@@ -85,9 +102,9 @@ gulp.task('watch', function() {
 
 gulp.task('zip', function(){
     return gulp.src('build/**')
-        .pipe(zip('kof_world_'+ timestamp() +'.zip'))
+        .pipe(zip('kof_dh_'+ timestamp() +'.zip'))
         .pipe(gulp.dest('zip'));
 });
 
 // The default task (called when you run `gulp` from cli)
-gulp.task('default', ['watch', 'css', 'scripts', 'jslibrary']);
+gulp.task('default', ['connect','watch', 'css', 'scripts', 'jslibrary']);

@@ -1,0 +1,18 @@
+//
+// modal
+// --------------------------------------------------
+
+.modal-close{
+  width:64px;
+  height:64px;
+  position: absolute;
+  top: -67px;
+  right: 0;
+  display: block;
+  cursor: pointer;
+  transition: transform ease-in-out .3s;
+  background: url(../img/modal/close.png) 0 0 no-repeat;
+  &:hover{
+    transform: rotate(180deg)
+  }
+}
