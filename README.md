@@ -1,7 +1,7 @@
 # gulp 项目建立规范
 
 ## 更新记录
-- 2017-05-04 更新支持LiveReload，监控html css js，需要Chrome安装插件LiveReload。
+- 2017-05-31 更新支持LiveReload，监控html css js，需要Chrome安装插件LiveReload。
 - 2017-05-04 更新支持最新Facebook开源了代码优化工具 [Prepack](https://prepack.io/)
 - 2016-05-04 更新乐道当前使用gulp生成环境。
 
