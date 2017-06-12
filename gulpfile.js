@@ -102,7 +102,7 @@ gulp.task('watch', function() {
 
 gulp.task('zip', function(){
     return gulp.src('build/**')
-        .pipe(zip('kof_dh_'+ timestamp() +'.zip'))
+        .pipe(zip('app_'+ timestamp() +'.zip'))
         .pipe(gulp.dest('zip'));
 });
 
